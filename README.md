@@ -1,2 +1,153 @@
 # scan-md
-md 文件扫描
+
+A command-line tool for scanning Markdown files and generating structured output.
+
+[简体中文](./README.zh-CN.md) | English
+
+## Features
+
+- Recursively scan directories for Markdown files
+- Extract titles from Markdown files (first H1 heading or fallback to filename)
+- Organize results by parent directory (optional)
+- Support multi-level directory nesting
+- Output as JSON or YAML format
+- Export to file or console
+
+## Installation
+
+### Global Installation
+
+```bash
+npm install -g scan-md
+```
+
+### Local Installation
+
+```bash
+npm install scan-md
+```
+
+## Usage
+
+### Basic Usage
+
+```bash
+# Scan current directory
+scan-md
+
+# Scan specific directory
+scan-md -d ./docs
+
+# Output to file
+scan-md -d ./docs -o toc.json
+
+# Output as YAML
+scan-md -d ./docs -f yml -o toc.yml
+```
+
+### Organizing by Parent Directory
+
+```bash
+# Organize by parent directory
+scan-md -d ./docs -p
+
+# Organize with custom depth (for nested directories)
+scan-md -d ./content -p --depth 2
+```
+
+### Ignoring Files or Directories
+
+```bash
+# Ignore specific patterns
+scan-md -d ./content --ignore "**/drafts/**" "temp.md"
+```
+
+### Prettifying Output
+
+```bash
+# Pretty-print JSON output
+scan-md -d ./docs --pretty
+```
+
+## Command-Line Options
+
+| Option         | Alias | Description                     | Default             |
+| -------------- | ----- | ------------------------------- | ------------------- |
+| `--dir`        | `-d`  | Directory to scan               | Current directory   |
+| `--output`     | `-o`  | Output file path                | (prints to console) |
+| `--format`     | `-f`  | Output format (`json` or `yml`) | `json`              |
+| `--parent-tag` | `-p`  | Organize by parent directory    | `false`             |
+| `--ignore`     |       | Glob patterns to ignore         | `[]`                |
+| `--pretty`     |       | Prettify JSON output            | `false`             |
+| `--depth`      |       | Directory nesting depth         | `1`                 |
+
+## Output Examples
+
+### Without Parent Tag
+
+```json
+[
+  {
+    "path": "java/basic.md",
+    "title": "Java Basics"
+  },
+  {
+    "path": "python/start.md",
+    "title": "Python Getting Started"
+  }
+]
+```
+
+### With Parent Tag (depth=1)
+
+```json
+{
+  "java": [
+    {
+      "path": "java/basic.md",
+      "title": "Java Basics"
+    }
+  ],
+  "python": [
+    {
+      "path": "python/start.md",
+      "title": "Python Getting Started"
+    }
+  ]
+}
+```
+
+### With Parent Tag (depth=2)
+
+```json
+{
+  "java": {
+    "advanced": [
+      {
+        "path": "java/advanced/concurrency.md",
+        "title": "Java Concurrency"
+      }
+    ]
+  }
+}
+```
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Run locally
+npm start -- -d ./docs -p
+
+# Run tests
+npm test
+```
+
+## License
+
+MIT

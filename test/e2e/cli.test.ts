@@ -1,0 +1,81 @@
+import { describe, expect, test, beforeAll, afterAll, vi } from 'vitest'
+import path from 'path'
+import fs from 'fs/promises'
+import { exec } from 'child_process'
+import { promisify } from 'util'
+
+const execAsync = promisify(exec)
+const testDir = path.join(process.cwd(), 'test', 'e2e', 'test-files')
+
+describe('CLI E2E Tests', () => {
+  beforeAll(async () => {
+    // Create test directory and sample markdown files
+    await fs.mkdir(testDir, { recursive: true })
+    await fs.mkdir(path.join(testDir, 'folder1'), { recursive: true })
+    await fs.mkdir(path.join(testDir, 'folder2'), { recursive: true })
+    await fs.mkdir(path.join(testDir, 'folder2', 'subfolder'), { recursive: true })
+
+    // Create sample files
+    await fs.writeFile(path.join(testDir, 'root.md'), '# Root File\n\nThis is content in the root file.')
+
+    await fs.writeFile(path.join(testDir, 'folder1', 'file1.md'), '# File One\n\nThis is content in file one.')
+
+    await fs.writeFile(path.join(testDir, 'folder2', 'file2.md'), '# File Two\n\nThis is content in file two.')
+
+    await fs.writeFile(path.join(testDir, 'folder2', 'subfolder', 'file3.md'), '# File Three\n\nThis is content in file three.')
+  })
+
+  afterAll(async () => {
+    // Clean up test directory
+    await fs.rm(testDir, { recursive: true, force: true })
+  })
+
+  test('should scan directory without parent tag', async () => {
+    const { stdout } = await execAsync(`node ../../dist/cli.js -d ${testDir}`)
+    const result = JSON.parse(stdout)
+
+    expect(Array.isArray(result)).toBe(true)
+    expect(result).toHaveLength(4)
+
+    const paths = result.map((item: any) => item.path)
+    expect(paths).toContain('root.md')
+    expect(paths).toContain('folder1/file1.md')
+    expect(paths).toContain('folder2/file2.md')
+    expect(paths).toContain('folder2/subfolder/file3.md')
+
+    const titles = result.map((item: any) => item.title)
+    expect(titles).toContain('Root File')
+    expect(titles).toContain('File One')
+    expect(titles).toContain('File Two')
+    expect(titles).toContain('File Three')
+  })
+
+  test('should scan directory with parent tag', async () => {
+    const { stdout } = await execAsync(`node ../../dist/cli.js -d ${testDir} -p`)
+    const result = JSON.parse(stdout)
+
+    expect(result).toHaveProperty('_root')
+    expect(result).toHaveProperty('folder1')
+    expect(result).toHaveProperty('folder2')
+
+    expect(result._root).toHaveLength(1)
+    expect(result.folder1).toHaveLength(1)
+    expect(result.folder2).toHaveLength(1)
+
+    expect(result._root[0].title).toBe('Root File')
+    expect(result.folder1[0].title).toBe('File One')
+    expect(result.folder2[0].title).toBe('File Two')
+  })
+
+  test('should scan directory with parent tag and depth=2', async () => {
+    const { stdout } = await execAsync(`node ../../dist/cli.js -d ${testDir} -p --depth 2`)
+    const result = JSON.parse(stdout)
+
+    expect(result).toHaveProperty('_root')
+    expect(result).toHaveProperty('folder1')
+    expect(result).toHaveProperty('folder2')
+    expect(result.folder2).toHaveProperty('subfolder')
+
+    expect(result.folder2.subfolder[0].title).toBe('File Three')
+  })
+})
