@@ -1,6 +1,6 @@
 {
   "name": "scan-markdown",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "CLI tool for scanning markdown files and generating structured output",
   "main": "dist/cli.js",
   "bin": {
@@ -13,7 +13,7 @@
     "test:e2e": "vitest run test/e2e/cli.test.ts",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "prepublish": "npm run build"
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "markdown",
