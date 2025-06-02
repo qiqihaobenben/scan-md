@@ -1,4 +1,4 @@
-# scan-md
+# scan-markdown
 
 一个用于扫描 Markdown 文件并生成结构化输出的命令行工具。
 
@@ -16,13 +16,13 @@
 ### 全局安装
 
 ```bash
-npm install -g scan-md
+npm install -g scan-markdown
 ```
 
 ### 本地安装
 
 ```bash
-npm install scan-md
+npm install scan-markdown
 ```
 
 ## 使用方法

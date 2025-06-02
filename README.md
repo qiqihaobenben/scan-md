@@ -1,4 +1,4 @@
-# scan-md
+# scan-markdown
 
 A command-line tool for scanning Markdown files and generating structured output.
 
@@ -18,13 +18,13 @@ A command-line tool for scanning Markdown files and generating structured output
 ### Global Installation
 
 ```bash
-npm install -g scan-md
+npm install -g scan-markdown
 ```
 
 ### Local Installation
 
 ```bash
-npm install scan-md
+npm install scan-markdown
 ```
 
 ## Usage
