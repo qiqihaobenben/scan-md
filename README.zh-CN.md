@@ -46,11 +46,14 @@ scan-md -d ./docs -f yml -o toc.yml
 ### 按父目录组织
 
 ```bash
-# 按父目录组织
-scan-md -d ./docs -p
+# 按父目录组织 (flat 模式)
+scan-md -d ./docs -p flat
 
-# 自定义嵌套深度（用于多级目录）
-scan-md -d ./content -p --depth 2
+# 按父目录组织 (tree 模式)
+scan-md -d ./docs -p tree
+
+# 同 -p flat (保持向后兼容性)
+scan-md -d ./docs -p
 ```
 
 ### 忽略特定文件或目录
@@ -69,15 +72,14 @@ scan-md -d ./docs --pretty
 
 ## 命令行选项
 
-| 选项           | 别名 | 描述                      | 默认值           |
-| -------------- | ---- | ------------------------- | ---------------- |
-| `--dir`        | `-d` | 要扫描的目录              | 当前目录         |
-| `--output`     | `-o` | 输出文件路径              | （输出到控制台） |
-| `--format`     | `-f` | 输出格式（`json`或`yml`） | `json`           |
-| `--parent-tag` | `-p` | 按父目录组织              | `false`          |
-| `--ignore`     |      | 要忽略的 glob 模式        | `[]`             |
-| `--pretty`     |      | 美化 JSON 输出            | `false`          |
-| `--depth`      |      | 目录嵌套深度              | `1`              |
+| 选项           | 别名 | 描述                       | 默认值           |
+| -------------- | ---- | -------------------------- | ---------------- |
+| `--dir`        | `-d` | 要扫描的目录               | 当前目录         |
+| `--output`     | `-o` | 输出文件路径               | （输出到控制台） |
+| `--format`     | `-f` | 输出格式（`json`或`yml`）  | `json`           |
+| `--parent-tag` | `-p` | 组织模式（`flat`或`tree`） | `false`          |
+| `--ignore`     |      | 要忽略的 glob 模式         | `[]`             |
+| `--pretty`     |      | 美化 JSON 输出             | `false`          |
 
 ## 输出示例
 
@@ -96,34 +98,62 @@ scan-md -d ./docs --pretty
 ]
 ```
 
-### 使用父目录标签（深度为 1）
+### 使用父目录标签（flat 模式）
 
 ```json
 {
-  "java": [
+  "_root": [
     {
-      "path": "java/basic.md",
-      "title": "Java 基础"
+      "path": "root.md",
+      "title": "Root File"
     }
   ],
-  "python": [
+  "folder1": [
     {
-      "path": "python/start.md",
-      "title": "Python 入门"
+      "path": "folder1/file1.md",
+      "title": "File One"
+    }
+  ],
+  "folder2": [
+    {
+      "path": "folder2/file2.md",
+      "title": "File Two"
+    },
+    {
+      "path": "folder2/file3.md",
+      "title": "File Three"
     }
   ]
 }
 ```
 
-### 使用父目录标签（深度为 2）
+### 使用父目录标签（tree 模式）
 
 ```json
 {
-  "java": {
-    "advanced": [
+  "_root": [
+    {
+      "path": "root.md",
+      "title": "Root File"
+    }
+  ],
+  "folder1": {
+    "subfolder": [
       {
-        "path": "java/advanced/concurrency.md",
-        "title": "Java 并发"
+        "path": "folder1/subfolder/file1.md",
+        "title": "File One"
+      }
+    ]
+  },
+  "folder2": {
+    "subfolder": [
+      {
+        "path": "folder2/subfolder/file2.md",
+        "title": "File Two"
+      },
+      {
+        "path": "folder2/subfolder/file3.md",
+        "title": "File Three"
       }
     ]
   }

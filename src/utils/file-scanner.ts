@@ -32,8 +32,8 @@ export interface IFileScanOptions {
 export async function extractTitle(content: string, filePath: string): Promise<string> {
   // Try to extract from front matter
   const { data } = matter(content)
-  if (data.title && typeof data.title === 'string') {
-    return data.title
+  if (data['title'] && typeof data['title'] === 'string') {
+    return data['title']
   }
 
   // Try to extract first h1 heading
@@ -94,48 +94,93 @@ export async function scanMarkdownFiles(options: IFileScanOptions): Promise<Flat
  * @returns Grouped result
  */
 export function groupByParentDirectory(entries: FlatResult, depth: number): GroupedResult {
-  const result: GroupedResult = {}
+  // 创建根节点
+  const root: IMarkdownEntry[] = []
 
+  // 用于快速查找已创建的目录节点
+  const dirMap: Record<string, IMarkdownEntry> = {}
+
+  // 处理每个文件条目
   for (const entry of entries) {
     const pathParts = entry.path.split(path.sep)
+    const fileName = pathParts[pathParts.length - 1]
 
-    // Skip files in the root directory if they don't have parent directories
-    if (pathParts.length <= 1) {
-      const rootKey = '_root'
-      result[rootKey] = result[rootKey] || []
-      ;(result[rootKey] as IMarkdownEntry[]).push(entry)
+    // 如果文件在根目录
+    if (pathParts.length === 1 || depth === 1) {
+      if (depth === 1) {
+        root.push({
+          ...entry,
+        })
+      } else {
+        root.push({
+          ...entry,
+          parent: '',
+          children: [],
+        })
+      }
       continue
     }
 
-    // Extract parent directories up to the specified depth
+    // 获取目录路径部分（限制到指定深度）
     const dirDepth = Math.min(depth, pathParts.length - 1)
     const dirs = pathParts.slice(0, dirDepth)
 
-    // For single-level grouping
-    if (depth === 1) {
-      const dir = dirs[0]
-      result[dir] = result[dir] || []
-      ;(result[dir] as IMarkdownEntry[]).push(entry)
-    }
-    // For multi-level grouping
-    else {
-      let current = result
+    // 当前处理的目录路径
+    let currentPath = ''
+    let parentPath = ''
+    let currentNode: IMarkdownEntry | null = null
 
-      // Navigate through the directory hierarchy
-      for (let i = 0; i < dirs.length - 1; i++) {
-        const dir = dirs[i]
-        current[dir] = current[dir] || {}
-        current = current[dir] as Record<string, any>
+    // 逐级创建或获取目录节点
+    for (let i = 0; i < dirs.length; i++) {
+      const dir = dirs[i]
+      if (!dir) {
+        continue
       }
 
-      // Add the entry to the deepest level
-      const lastDir = dirs[dirs.length - 1]
-      current[lastDir] = current[lastDir] || []
-      ;(current[lastDir] as IMarkdownEntry[]).push(entry)
+      // 更新路径
+      if (currentPath) {
+        parentPath = currentPath
+        currentPath = `${currentPath}/${dir}`
+      } else {
+        currentPath = dir
+        parentPath = ''
+      }
+
+      // 检查此目录节点是否已存在
+      if (!dirMap[currentPath]) {
+        // 创建新的目录节点
+        const dirNode: IMarkdownEntry = {
+          path: currentPath,
+          title: dir || '',
+          parent: parentPath,
+          children: [],
+        }
+
+        // 将节点加入映射表
+        dirMap[currentPath] = dirNode
+
+        // 将节点添加到父节点的子节点列表
+        if (parentPath) {
+          dirMap[parentPath]?.children?.push(dirNode)
+        } else {
+          // 顶级目录直接加入根节点
+          root.push(dirNode)
+        }
+      }
+
+      currentNode = dirMap[currentPath] || null
+    }
+
+    // 将文件添加到其直接父目录节点的子节点
+    if (currentNode && currentNode.children) {
+      currentNode.children.push({
+        ...entry,
+        parent: currentPath,
+      })
     }
   }
 
-  return result
+  return root
 }
 
 /**

@@ -29,15 +29,29 @@ describe('formatAsJson', () => {
 
 describe('formatAsYaml', () => {
   test('should format as YAML', () => {
-    const data: GroupedResult = {
-      category1: [
-        { path: 'category1/file1.md', title: 'Title 1' },
-        { path: 'category1/file2.md', title: 'Title 2' },
-      ],
-    }
+    const data: GroupedResult = [
+      { path: 'root.md', title: 'Root File', parent: '', children: [] },
+      {
+        path: 'folder1',
+        title: 'folder1',
+        parent: '',
+        children: [
+          { path: 'folder1/file1.md', title: 'Title 1' },
+          { path: 'folder1/file2.md', title: 'Title 2' },
+        ],
+      },
+      {
+        path: 'folder2',
+        title: 'folder2',
+        parent: '',
+        children: [
+          { path: 'folder2/file4.md', title: 'Title 1' },
+          { path: 'folder2/file5.md', title: 'Title 2' },
+        ],
+      },
+    ]
 
     const result = formatAsYaml(data)
-    expect(result).toContain('category1:')
     expect(result).toContain('  - path:')
     expect(result).toContain('    title:')
   })

@@ -12,10 +12,9 @@ const commandOptionsSchema = z.object({
   dir: z.string().default(process.cwd()),
   output: z.string().optional(),
   format: z.enum(['json', 'yml']).default('json'),
-  parentTag: z.boolean().default(false),
+  parentTag: z.union([z.literal('flat'), z.literal('tree'), z.boolean()]).default(false),
   ignore: z.array(z.string()).default([]),
   pretty: z.boolean().default(false),
-  depth: z.number().int().positive().default(1),
 })
 
 // Create the program
@@ -26,10 +25,9 @@ const program = new Command()
   .option('-d, --dir <directory>', 'Directory to scan for markdown files', process.cwd())
   .option('-o, --output <file>', 'Output file path')
   .option('-f, --format <format>', 'Output format (json or yml)', 'json')
-  .option('-p, --parent-tag', 'Organize by parent directory', false)
+  .option('-p, --parent-tag [mode]', 'Organization mode (flat or tree)', false)
   .option('--ignore <patterns...>', 'Glob patterns to ignore')
   .option('--pretty', 'Prettify JSON output', false)
-  .option('--depth <number>', 'Directory nesting depth for parentTag mode', '1')
 
 async function main(): Promise<void> {
   program.parse()
@@ -37,21 +35,30 @@ async function main(): Promise<void> {
   try {
     // Parse and validate options
     const options = program.opts()
+
+    // 处理 parentTag 参数，将 true 转为 'flat'
+    let parentTagValue = options.parentTag
+    if (parentTagValue === true) {
+      parentTagValue = 'flat'
+    }
+
     const validatedOptions = commandOptionsSchema.parse({
       ...options,
       dir: path.resolve(options.dir),
-      depth: options.depth ? parseInt(options.depth, 10) : 1,
-      parentTag: options.parentTag || false,
-    } as unknown as ICommandOptions)
+      parentTag: parentTagValue,
+    })
+
+    // 确定扫描深度
+    const scanDepth = validatedOptions.parentTag === 'tree' ? 9999999 : 1
 
     // Process markdown files
     const result = await processMarkdownFiles(
       {
         dir: validatedOptions.dir,
         ignore: validatedOptions.ignore,
-        depth: validatedOptions.depth,
+        depth: scanDepth,
       },
-      validatedOptions.parentTag
+      !!validatedOptions.parentTag
     )
 
     // Output the result

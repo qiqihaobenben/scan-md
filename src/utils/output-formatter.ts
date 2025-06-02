@@ -18,7 +18,7 @@ const outputOptionsSchema = z.object({
 export interface IOutputOptions {
   format: 'json' | 'yml'
   pretty: boolean
-  output?: string
+  output?: string | undefined
 }
 
 /**

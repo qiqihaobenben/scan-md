@@ -5,17 +5,15 @@ export interface ICommandOptions {
   /** Directory to scan for markdown files */
   dir: string
   /** Output file path. If not provided, output to console */
-  output?: string
+  output?: string | undefined
   /** Output format (json or yml) */
   format: 'json' | 'yml'
-  /** Whether to organize by parent directory */
-  parentTag: boolean
+  /** Organization mode (flat, tree, or false) */
+  parentTag: 'flat' | 'tree' | boolean
   /** Ignore patterns (glob patterns) */
   ignore: string[]
   /** Prettify JSON output */
   pretty: boolean
-  /** Directory nesting depth for parentTag mode */
-  depth: number
 }
 
 /**
@@ -26,6 +24,10 @@ export interface IMarkdownEntry {
   path: string
   /** Title extracted from the markdown file */
   title: string
+  /** Parent directory */
+  parent?: string | undefined
+  /** Children */
+  children?: IMarkdownEntry[] | undefined
 }
 
 /**
@@ -36,7 +38,7 @@ export type FlatResult = IMarkdownEntry[]
 /**
  * Result with parent tag organization (grouped by directory)
  */
-export type GroupedResult = Record<string, IMarkdownEntry[] | Record<string, any>>
+export type GroupedResult = Array<IMarkdownEntry[] | Record<string, any>>
 
 /**
  * Combined result type

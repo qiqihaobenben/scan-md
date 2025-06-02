@@ -48,11 +48,14 @@ scan-md -d ./docs -f yml -o toc.yml
 ### Organizing by Parent Directory
 
 ```bash
-# Organize by parent directory
-scan-md -d ./docs -p
+# Organize by parent directory (flat mode)
+scan-md -d ./docs -p flat
 
-# Organize with custom depth (for nested directories)
-scan-md -d ./content -p --depth 2
+# Organize by parent directory with tree structure
+scan-md -d ./docs -p tree
+
+# Same as -p flat (backward compatibility)
+scan-md -d ./docs -p
 ```
 
 ### Ignoring Files or Directories
@@ -71,15 +74,14 @@ scan-md -d ./docs --pretty
 
 ## Command-Line Options
 
-| Option         | Alias | Description                     | Default             |
-| -------------- | ----- | ------------------------------- | ------------------- |
-| `--dir`        | `-d`  | Directory to scan               | Current directory   |
-| `--output`     | `-o`  | Output file path                | (prints to console) |
-| `--format`     | `-f`  | Output format (`json` or `yml`) | `json`              |
-| `--parent-tag` | `-p`  | Organize by parent directory    | `false`             |
-| `--ignore`     |       | Glob patterns to ignore         | `[]`                |
-| `--pretty`     |       | Prettify JSON output            | `false`             |
-| `--depth`      |       | Directory nesting depth         | `1`                 |
+| Option         | Alias | Description                          | Default             |
+| -------------- | ----- | ------------------------------------ | ------------------- |
+| `--dir`        | `-d`  | Directory to scan                    | Current directory   |
+| `--output`     | `-o`  | Output file path                     | (prints to console) |
+| `--format`     | `-f`  | Output format (`json` or `yml`)      | `json`              |
+| `--parent-tag` | `-p`  | Organization mode (`flat` or `tree`) | `false`             |
+| `--ignore`     |       | Glob patterns to ignore              | `[]`                |
+| `--pretty`     |       | Prettify JSON output                 | `false`             |
 
 ## Output Examples
 
@@ -98,7 +100,7 @@ scan-md -d ./docs --pretty
 ]
 ```
 
-### With Parent Tag (depth=1)
+### With Parent Tag (flat mode)
 
 ```json
 {
@@ -117,7 +119,7 @@ scan-md -d ./docs --pretty
 }
 ```
 
-### With Parent Tag (depth=2)
+### With Parent Tag (tree mode)
 
 ```json
 {

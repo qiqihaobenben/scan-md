@@ -31,7 +31,7 @@ describe('CLI E2E Tests', () => {
   })
 
   test('should scan directory without parent tag', async () => {
-    const { stdout } = await execAsync(`node ../../dist/cli.js -d ${testDir}`)
+    const { stdout } = await execAsync(`node ./dist/cli.js -d ${testDir}`)
     const result = JSON.parse(stdout)
 
     expect(Array.isArray(result)).toBe(true)
@@ -50,32 +50,62 @@ describe('CLI E2E Tests', () => {
     expect(titles).toContain('File Three')
   })
 
-  test('should scan directory with parent tag', async () => {
-    const { stdout } = await execAsync(`node ../../dist/cli.js -d ${testDir} -p`)
+  test('should scan directory with flat organization (implicit)', async () => {
+    const { stdout } = await execAsync(`node ./dist/cli.js -d ${testDir} -p`)
     const result = JSON.parse(stdout)
 
-    expect(result).toHaveProperty('_root')
-    expect(result).toHaveProperty('folder1')
-    expect(result).toHaveProperty('folder2')
+    expect(Array.isArray(result)).toBe(true)
+    expect(result).toHaveLength(4)
 
-    expect(result._root).toHaveLength(1)
-    expect(result.folder1).toHaveLength(1)
-    expect(result.folder2).toHaveLength(1)
+    const paths = result.map((item: any) => item.path)
+    expect(paths).toContain('root.md')
+    expect(paths).toContain('folder1/file1.md')
+    expect(paths).toContain('folder2/file2.md')
+    expect(paths).toContain('folder2/subfolder/file3.md')
 
-    expect(result._root[0].title).toBe('Root File')
-    expect(result.folder1[0].title).toBe('File One')
-    expect(result.folder2[0].title).toBe('File Two')
+    const titles = result.map((item: any) => item.title)
+    expect(titles).toContain('Root File')
+    expect(titles).toContain('File One')
+    expect(titles).toContain('File Two')
+    expect(titles).toContain('File Three')
   })
 
-  test('should scan directory with parent tag and depth=2', async () => {
-    const { stdout } = await execAsync(`node ../../dist/cli.js -d ${testDir} -p --depth 2`)
+  test('should scan directory with flat organization (explicit)', async () => {
+    const { stdout } = await execAsync(`node ./dist/cli.js -d ${testDir} -p flat`)
     const result = JSON.parse(stdout)
 
-    expect(result).toHaveProperty('_root')
-    expect(result).toHaveProperty('folder1')
-    expect(result).toHaveProperty('folder2')
-    expect(result.folder2).toHaveProperty('subfolder')
+    expect(Array.isArray(result)).toBe(true)
+    expect(result).toHaveLength(4)
 
-    expect(result.folder2.subfolder[0].title).toBe('File Three')
+    const paths = result.map((item: any) => item.path)
+    expect(paths).toContain('root.md')
+    expect(paths).toContain('folder1/file1.md')
+    expect(paths).toContain('folder2/file2.md')
+    expect(paths).toContain('folder2/subfolder/file3.md')
+
+    const titles = result.map((item: any) => item.title)
+    expect(titles).toContain('Root File')
+    expect(titles).toContain('File One')
+    expect(titles).toContain('File Two')
+    expect(titles).toContain('File Three')
+  })
+
+  test('should scan directory with tree organization', async () => {
+    const { stdout } = await execAsync(`node ./dist/cli.js -d ${testDir} -p tree`)
+    const result = JSON.parse(stdout)
+
+    expect(Array.isArray(result)).toBe(true)
+    expect(result).toHaveLength(3)
+
+    const folder2 = result.find((item: any) => item.path === 'folder2')
+    expect(folder2).toBeDefined()
+    expect(folder2.children).toHaveLength(2)
+    expect(folder2.children[0].path).toBe('folder2/file2.md')
+    expect(folder2.children[1].path).toBe('folder2/subfolder')
+
+    const subfolder = folder2.children.find((item: any) => item.path === 'folder2/subfolder')
+    expect(subfolder).toBeDefined()
+    expect(subfolder.children).toHaveLength(1)
+    expect(subfolder.children[0].path).toBe('folder2/subfolder/file3.md')
   })
 })
