@@ -1,5 +1,5 @@
 {
-  "name": "scan-md",
+  "name": "scan-markdown",
   "version": "1.0.0",
   "description": "CLI tool for scanning markdown files and generating structured output",
   "main": "dist/cli.js",
@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:e2e": "vitest run test/e2e/cli.test.ts",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "prepublish": "npm run build"
   },
   "keywords": [
     "markdown",
@@ -20,7 +21,12 @@
     "scanner",
     "documentation"
   ],
-  "author": "",
+  "author": "ai & chenfangxu <chenfangxu_qixin@163.com> (https://github.com/qiqihaobenben)",
+  "homepage": "https://github.com/qiqihaobenben/scan-md/blob/release/README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/qiqihaobenben/scan-md.git"
+  },
   "license": "MIT",
   "dependencies": {
     "commander": "^11.1.0",
